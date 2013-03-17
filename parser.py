@@ -29,4 +29,18 @@ class ParseMultiplication(tdparser.Token):
 lexer = tdparser.Lexer(with_parens=True)
 lexer.register_tokens(ParseInteger, ParseAddition, ParseMultiplication)
 
-print lexer.parse ('3 + (1 + 4)')
+# print lexer.parse ('3 + (1 + 4)')
+
+def checkType (struct, name):
+    return type(struct).__name__ == name
+    
+def compile (expr):
+    if checkType(expr, 'Integer'):
+        print "Found an Integer: %s" % expr.value
+        
+    if checkType(expr, 'Binop'):
+        print "Found a Binop: %s" % expr.kind
+        compile(expr.lhs)
+        compile(expr.rhs)
+
+compile(lexer.parse('3 + (1 + 4)'))
