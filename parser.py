@@ -1,32 +1,26 @@
 # https://tdparser.readthedocs.org/en/latest/
 import tdparser
 
-# http://pysnippet.blogspot.com/2010/01/named-tuple.html
-from collections import namedtuple as NT
-
-Integer = NT('Integer', 'value')
-Binop   = NT('Binop', 'kind, lhs, rhs')
-
-class ParseInteger(tdparser.Token):
+class Integer(tdparser.Token):
     regexp = r'\d+'
     def nud(self, context):
-        return Integer(int(self.text))
+        return int(self.text)
         
-class ParseAddition(tdparser.Token):
+class Addition(tdparser.Token):
     regexp = r'\+'
     lbp = 10
 
     def led(self, left, context):
-        return Binop('+', left, context.expression(self.lbp))
+        return left + context.expression(self.lbp)
 
-class ParseMultiplication(tdparser.Token):
+class Multiplication(tdparser.Token):
     regexp = r'\*'
     lbp = 20
 
     def led(self, left, context):
-        return Binop('*', left, context.expression(self.lbp))
+        return left * context.expression(self.lbp)
         
 lexer = tdparser.Lexer(with_parens=True)
-lexer.register_tokens(ParseInteger, ParseAddition, ParseMultiplication)
+lexer.register_tokens(Integer, Addition, Multiplication)
 
 print lexer.parse ('3 + (1 + 4)')
