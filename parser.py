@@ -36,11 +36,39 @@ def checkType (struct, name):
     
 def compile (expr):
     if checkType(expr, 'Integer'):
-        print "Found an Integer: %s" % expr.value
+        result = "@%s" % expr.value
+        result += "\n"
+        result += "D=A"
+        return result
         
     if checkType(expr, 'Binop'):
-        print "Found a Binop: %s" % expr.kind
-        compile(expr.lhs)
-        compile(expr.rhs)
+        # Compile the LHS
+        result = "%s" % compile(expr.lhs)
+        result += "\n"
+        # Store that in RAM[0]
+        result += "@0"
+        result += "\n"
+        result += "M=D"
+        result += "\n"
+        # Compile the RHS
+        result += "%s" % compile(expr.rhs)
+        result += "\n"
+        # Store that in RAM1
+        result += "@1"
+        result += "\n"
+        result += "D=M"
+        result += "\n"
+        # Load RAM[0] into D
+        result += "@0"
+        result += "\n"
+        result += "D=M"
+        result += "\n"
+        # Add D and RAM[1] ; store back into D
+        result += "@1"
+        result += "\n"
+        result += "D=D+M"
+        
+        # Return the resulting assembly
+        return result
 
-compile(lexer.parse('3 + (1 + 4)'))
+print compile(lexer.parse('3 + (1 + 4)'))
