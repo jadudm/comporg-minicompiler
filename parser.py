@@ -34,25 +34,28 @@ lexer.register_tokens(ParseInteger, ParseAddition, ParseMultiplication)
 def checkType (struct, name):
     return type(struct).__name__ == name
     
-def compile (expr):
+def compile (expr, offset):
     if checkType(expr, 'Integer'):
         result = "@%s" % expr.value
         result += "\n"
         result += "D=A"
+        result += "\n"
         return result
         
     if checkType(expr, 'Binop'):
         # Pre-compile the LHS and RHS
-        lhs_result = compile(expr.lhs)
-        rhs_result = compile(expr.rhs)
+        # Increment our offset as we go.
+        lhs_result = compile(expr.lhs, offset + 1)
+        rhs_result = compile(expr.rhs, offset + 1)
+        result = ""
         
         # Collect up the LHS compilation
         result += lhs_result
         # The LHS result will be left in
         # the D register.
 
-        # Store D in RAM[0]
-        result += "@0"
+        # Store D in RAM[0 + offset]
+        result += "@%s" % (0 + offset)
         result += "\n"
         result += "M=D"
         result += "\n"
@@ -62,25 +65,26 @@ def compile (expr):
         # The RHS result will be left in
         # the D register.
 
-        # Store D in RAM1
-        result += "@1"
+        # Store D in RAM[1 + offset]
+        result += "@%s" % (1 + offset)
         result += "\n"
-        result += "D=M"
+        result += "M=D"
         result += "\n"
         
         # Now, load things back, and add them.
         
-        # Load RAM[0] into D
-        result += "@0"
+        # Load RAM[0 + offset] into D
+        result += "@%s" % (0 + offset)
         result += "\n"
-        result += "D=M"
+        result += "M=D"
         result += "\n"
         
         # Add D and RAM[1] ; store back into D
-        result += "@1"
+        result += "@%s" % (1 + offset)
         result += "\n"
         result += "D=D+M"
-        
+        result += "\n"
+                
         # We have now (recursively) computed 
         # the addition of two numbers. The result
         # is left in the D register. 
@@ -88,4 +92,4 @@ def compile (expr):
         # Return the resulting assembly
         return result
 
-print compile(lexer.parse('3 + (1 + 4)'))
+print compile(lexer.parse('(8 + 9) + (10 + 11)'), 0)
