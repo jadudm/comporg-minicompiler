@@ -1,5 +1,6 @@
 # https://tdparser.readthedocs.org/en/latest/
 import tdparser
+import sys
 
 # http://pysnippet.blogspot.com/2010/01/named-tuple.html
 from collections import namedtuple as NT
@@ -76,7 +77,7 @@ def compile (expr, offset):
         # Load RAM[0 + offset] into D
         result += "@%s" % (0 + offset)
         result += "\n"
-        result += "M=D"
+        result += "D=M"
         result += "\n"
         
         # Add D and RAM[1] ; store back into D
@@ -92,4 +93,34 @@ def compile (expr, offset):
         # Return the resulting assembly
         return result
 
-print compile(lexer.parse('(8 + 9) + (10 + 11)'), 0)
+#print compile(lexer.parse('(8 + 9) + (10 + 11)'), 0)
+# print compile(lexer.parse('3 + (1 + 4)'), 0)
+
+def driver (infile, outfile):
+    print "Processing %s" % infile
+    # Slurp in the entire file
+    inf = open(infile, 'r')
+    
+    full_program = ""
+    
+    for line in inf:
+        full_program += line.strip()
+
+    # Print it
+    print full_program
+    
+    # Parse it
+    parsed = lexer.parse(full_program)
+    
+    # Compile it
+    outf = open(outfile, 'w')
+    outf.write(compile(parsed, 0))
+    
+    # Move the result to RAM[0], and loop.
+    outf.write('@0\n')
+    outf.write('M=D\n')
+    outf.write('(INF)\n')
+    outf.write('@INF\n')
+    outf.write('0;JMP\n')
+    
+driver(sys.argv[1], sys.argv[2])
