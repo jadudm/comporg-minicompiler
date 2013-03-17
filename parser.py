@@ -42,31 +42,48 @@ def compile (expr):
         return result
         
     if checkType(expr, 'Binop'):
-        # Compile the LHS
-        result = "%s" % compile(expr.lhs)
-        result += "\n"
-        # Store that in RAM[0]
+        # Pre-compile the LHS and RHS
+        lhs_result = compile(expr.lhs)
+        rhs_result = compile(expr.rhs)
+        
+        # Collect up the LHS compilation
+        result += lhs_result
+        # The LHS result will be left in
+        # the D register.
+
+        # Store D in RAM[0]
         result += "@0"
         result += "\n"
         result += "M=D"
         result += "\n"
-        # Compile the RHS
-        result += "%s" % compile(expr.rhs)
-        result += "\n"
-        # Store that in RAM1
+
+        # Collect up the RHS
+        result += rhs_result
+        # The RHS result will be left in
+        # the D register.
+
+        # Store D in RAM1
         result += "@1"
         result += "\n"
         result += "D=M"
         result += "\n"
+        
+        # Now, load things back, and add them.
+        
         # Load RAM[0] into D
         result += "@0"
         result += "\n"
         result += "D=M"
         result += "\n"
+        
         # Add D and RAM[1] ; store back into D
         result += "@1"
         result += "\n"
         result += "D=D+M"
+        
+        # We have now (recursively) computed 
+        # the addition of two numbers. The result
+        # is left in the D register. 
         
         # Return the resulting assembly
         return result
