@@ -1,0 +1,7 @@
+declare sum = 0;
+declare x   = 10;
+while (x > 0) {
+  set sum = x + sum;
+  set x   = x - 1;
+}
+sum;

@@ -1,0 +1,15 @@
+declare x = 1;
+declare y = 2;
+declare z = 3;
+if (x > y) {
+  if (z < (x * y)) {
+    x * (y * z);
+  } else {
+    z - y;
+  }
+} else {
+  while (z > 0) {
+    set z = z - 1;
+  }
+}
+42;
